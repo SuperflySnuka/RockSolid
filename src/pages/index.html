@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RockSolid | Home</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/home.css" />
+</head>
+<body>
+  <div id="nav"></div>
+
+  <main class="container">
+    <section class="page-title">
+        <h1>RockSolid</h1>
+        <p>Home • Your skill progression hub.</p>
+    </section>
+
+    <section class="grid two">
+      <a class="panel" href="my-skills.html">
+        <h2>My Skills</h2>
+        <p class="small">Track progressions you’re currently training.</p>
+      </a>
+
+      <a class="panel" href="skill-search.html">
+        <h2>Skill Search</h2>
+        <p class="small">Find skills and prep exercises by filters.</p>
+      </a>
+
+      <a class="panel" href="routines.html">
+        <h2>Routines</h2>
+        <p class="small">Build and save workouts.</p>
+      </a>
+
+      <a class="panel" href="sweat.html">
+        <h2>Sweat</h2>
+        <p class="small">Generate a workout + run a timer/checklist.</p>
+      </a>
+    </section>
+    
+    <section class="panel flex-panel">
+            <div class="row wrap" style="justify-content: space-between;">
+                <h2 style="margin:0;">Daily Flex</h2>
+        <span class="small" id="gif-status">Loading a flex...</span>
+            </div>
+            <div class="spacer"></div>
+        <div id="flex-gif" class="flex-gif">
+        <!-- gif injected here -->
+        </div>
+    </section>
+
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/pages/home.js"></script>
+</body>
+</html>

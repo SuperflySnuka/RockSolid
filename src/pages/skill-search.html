@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RockSolid | Skill Search</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/skill-search.css" />
+</head>
+<body>
+  <div id="nav"></div>
+
+  <main class="container">
+    <section class="page-title">
+      <h1>Skill Search</h1>
+      <p>Search and filter skills/exercises.</p>
+    </section>
+
+    <section class="panel">
+      <div class="grid two">
+        <div>
+          <label for="query">Search</label>
+          <input class="input" id="query" placeholder="Planche, Handstand, Hip flexors..." />
+        </div>
+
+        <div>
+          <label for="filter-type">Type</label>
+          <select id="filter-type">
+            <option value="">Any</option>
+            <option value="strength">Strength</option>
+            <option value="balance">Balance</option>
+            <option value="flexibility">Flexibility</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="filter-difficulty">Difficulty</label>
+          <select id="filter-difficulty">
+            <option value="">Any</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="filter-muscle">Muscle group</label>
+          <select id="filter-muscle">
+            <option value="">Any</option>
+            <option value="core">Core</option>
+            <option value="chest">Chest</option>
+            <option value="shoulders">Shoulders</option>
+            <option value="back">Back</option>
+            <option value="legs">Legs</option>
+            <option value="hip-flexors">Hip flexors</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="row wrap">
+        <button class="btn primary" id="search-btn">Search</button>
+        <span class="small" id="search-status">Ready</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="grid three" id="results-grid">
+        <!-- results injected here -->
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/pages/skill-search.js"></script>
+</body>
+</html>

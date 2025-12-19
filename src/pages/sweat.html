@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RockSolid | Sweat</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/sweat.css" />
+</head>
+<body>
+  <div id="nav"></div>
+
+  <main class="container">
+    <section class="page-title">
+      <h1>Sweat</h1>
+      <p>Generate a workout and run it.</p>
+    </section>
+
+    <section class="panel">
+      <div class="grid two">
+        <div>
+          <label for="sweat-mode">Generate by</label>
+          <select id="sweat-mode">
+            <option value="skill">Skill</option>
+            <option value="muscle">Muscle group</option>
+          </select>
+        </div>
+        <div>
+          <label for="sweat-pick">Pick one</label>
+          <input class="input" id="sweat-pick" placeholder="Planche / Core / Shoulders..." />
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="row wrap">
+        <button class="btn primary" id="generate-btn">Generate Workout</button>
+        <button class="btn" id="start-btn" disabled>Start</button>
+        <span class="small" id="sweat-status">Ready</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="grid two">
+        <div class="panel" id="workout-list">
+          <h2>Workout</h2>
+          <p class="small">Exercises will appear here.</p>
+        </div>
+
+        <div class="panel" id="timer-panel">
+          <h2>Timer</h2>
+          <p class="small">Simple timer/checklist will go here.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/pages/sweat.js"></script>
+</body>
+</html>

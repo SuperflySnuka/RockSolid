@@ -1,0 +1,20 @@
+/* ========== RockSolid Home Styles ========== */
+/* Bottom random gif */
+.flex-panel { margin-top: 14px; }
+
+.flex-gif {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  min-height: 220px;
+}
+
+.flex-gif img {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  display: block;
+}
