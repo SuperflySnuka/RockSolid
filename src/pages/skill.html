@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RockSolid | Skill</title>
+
+  <link rel="stylesheet" href="/src/css/base.css" />
+  <link rel="stylesheet" href="/src/css/skill.css" />
+</head>
+<body>
+  <div id="nav"></div>
+
+  <main class="container">
+    <section class="page-title">
+      <h1 id="skill-name">Skill</h1>
+      <p class="small" id="skill-subtitle">Loading…</p>
+    </section>
+
+    <section class="panel" id="skill-card">
+      <div class="grid two">
+        <div>
+          <h3>Type</h3>
+          <p id="skill-type">—</p>
+        </div>
+        <div>
+          <h3>Category</h3>
+          <p id="skill-category">—</p>
+        </div>
+        <div>
+          <h3>Difficulty</h3>
+          <p id="skill-difficulty">—</p>
+        </div>
+        <div>
+          <h3>Equipment</h3>
+          <p id="skill-equipment">—</p>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div>
+        <h3>Muscles</h3>
+        <div id="skill-muscles" class="chips"></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="row wrap">
+        <button class="btn primary" id="add-to-routine-btn">Add to Routine</button>
+        <a class="btn" href="/src/pages/skill-search.html">Back to Search</a>
+      </div>
+
+      <p class="small" id="skill-status"></p>
+    </section>
+  </main>
+
+  <script type="module" src="/src/js/pages/skill.js"></script>
+</body>
+</html>

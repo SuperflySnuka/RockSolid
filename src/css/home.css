@@ -11,10 +11,10 @@
   background: rgba(255,255,255,0.03);
   min-height: 220px;
 }
-
-.flex-gif img {
-  width: 100%;
-  max-width: 520px;
+#flex-gif img {
+  max-width: 100%;
   height: auto;
+  border-radius: 12px;
   display: block;
+  margin: 0 auto;
 }

@@ -1,0 +1,23 @@
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-table th,
+.results-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  vertical-align: top;
+}
+
+.results-table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+}
+
+.results-table tr:hover td {
+  background: rgba(255,255,255,0.04);
+}
