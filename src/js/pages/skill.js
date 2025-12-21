@@ -206,10 +206,16 @@ function renderInstructionsBox(skill) {
 /* ----------------- My Skills ----------------- */
 
 function saveToMySkills(skill) {
-  const list = safeParse(localStorage.getItem(MY_SKILLS_KEY), []);
-  if (!list.some((s) => s?.id === skill.id)) list.push(skill);
-  localStorage.setItem(MY_SKILLS_KEY, JSON.stringify(list));
+  const MY_SKILLS_KEY = "rocksolid_my_skills_v1";
+
+  const ids = safeParse(localStorage.getItem(MY_SKILLS_KEY), []);
+  const next = Array.isArray(ids) ? ids : [];
+
+  if (!next.includes(skill.id)) next.push(skill.id);
+
+  localStorage.setItem(MY_SKILLS_KEY, JSON.stringify(next));
 }
+
 
 /* ----------------- Routines ----------------- */
 
