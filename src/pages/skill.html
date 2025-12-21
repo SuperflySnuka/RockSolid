@@ -17,21 +17,21 @@
       <p class="small" id="skill-subtitle">Loading…</p>
     </section>
 
-    <section class="panel" id="skill-card">
+    <section class="panel">
       <div class="grid two">
-        <div>
+        <div class="kv">
           <h3>Type</h3>
           <p id="skill-type">—</p>
         </div>
-        <div>
+        <div class="kv">
           <h3>Category</h3>
           <p id="skill-category">—</p>
         </div>
-        <div>
+        <div class="kv">
           <h3>Difficulty</h3>
           <p id="skill-difficulty">—</p>
         </div>
-        <div>
+        <div class="kv">
           <h3>Equipment</h3>
           <p id="skill-equipment">—</p>
         </div>
@@ -41,13 +41,25 @@
 
       <div>
         <h3>Muscles</h3>
-        <div id="skill-muscles" class="chips"></div>
+        <div class="chips" id="skill-muscles"></div>
       </div>
+
+      <!-- Instructions (EXERCISE ONLY) -->
+      <div class="hr"></div>
+
+      <section id="instructions-section" style="display:none;">
+        <h3>Instructions</h3>
+        <ol id="instructions-list"></ol>
+        <p class="small" id="instructions-fallback" style="display:none; margin:0;">
+          No instructions available for this exercise yet.
+        </p>
+      </section>
 
       <div class="spacer"></div>
 
       <div class="row wrap">
-        <button class="btn primary" id="add-to-routine-btn">Add to Routine</button>
+        <button class="btn primary" id="save-skill-btn">Save to My Skills</button>
+        <button class="btn" id="add-to-routine-btn">Add to Routine</button>
         <a class="btn" href="/src/pages/skill-search.html">Back to Search</a>
       </div>
 

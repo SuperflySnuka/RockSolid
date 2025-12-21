@@ -43,12 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.warn("Yoga load failed (continuing without yoga):", e);
     }
 
-ALL_SKILLS = [...exerciseSkills, ...yogaSkills];
-sessionStorage.setItem(SKILLS_CACHE_KEY, JSON.stringify(ALL_SKILLS));
-
-
-
-
+    ALL_SKILLS = [...exerciseSkills, ...yogaSkills];
     // Cache for Skill Card page
     sessionStorage.setItem(SKILLS_CACHE_KEY, JSON.stringify(ALL_SKILLS));
 
@@ -79,6 +74,7 @@ sessionStorage.setItem(SKILLS_CACHE_KEY, JSON.stringify(ALL_SKILLS));
     typeEl.value = "";
     diffEl.value = "";
     muscleEl.value = "";
+    categoryEl.value = "";
     runSearch();
   });
 
@@ -213,7 +209,6 @@ function matchesCategory(skill, category) {
   if (!category) return true;
   return safeStr(skill.category) === category; // "strength"|"cardio"|"stretching"
 }
-
 
 function normalizeDifficulty(v) {
   const s = (v ?? "").toString().trim().toLowerCase();
