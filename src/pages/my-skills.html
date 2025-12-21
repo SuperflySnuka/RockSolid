@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>RockSolid | My Skills</title>
-  <link rel="stylesheet" href="../css/base.css" />
-  <link rel="stylesheet" href="../css/my-skills.css" />
+
+  <link rel="stylesheet" href="/src/css/base.css" />
+  <link rel="stylesheet" href="/src/css/my-skills.css" />
 </head>
 <body>
   <div id="nav"></div>
@@ -13,24 +14,27 @@
   <main class="container">
     <section class="page-title">
       <h1>My Skills</h1>
-      <p>What you’re training right now.</p>
+      <p class="small">Saved skills you can export/import as RockSolid files.</p>
     </section>
 
     <section class="panel">
       <div class="row wrap">
-        <button class="btn primary" id="add-skill-btn">Add Skill</button>
-        <span class="small" id="my-skills-status">0 tracked skills</span>
+        <button class="btn primary" id="export-btn">Export My Skills</button>
+
+        <label class="btn file-btn" for="import-file">Import My Skills</label>
+        <input id="import-file" type="file" accept=".json,application/json" />
+
+        <button class="btn danger" id="clear-btn">Clear All</button>
+
+        <span class="small" id="status">Ready</span>
       </div>
 
       <div class="hr"></div>
 
-      <div class="grid three" id="skills-grid">
-        <!-- skill cards injected here -->
-      </div>
+      <div class="grid three" id="my-skills-grid"></div>
     </section>
   </main>
 
-  <script src="../js/app.js"></script>
-  <script src="../js/pages/my-skills.js"></script>
+  <script type="module" src="/src/js/pages/my-skills.js"></script>
 </body>
 </html>
