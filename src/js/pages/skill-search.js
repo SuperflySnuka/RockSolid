@@ -1,4 +1,5 @@
 // src/js/pages/skill-search.js
+import { loadYogaSkills } from "../yoga.js";
 
 const EXERCISE_URL = "/src/data/exercises.json";
 const SKILLS_CACHE_KEY = "rocksolid_skills_cache_v1";
@@ -19,11 +20,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const typeEl = document.getElementById("filter-type"); // Strength/Balance/Flexibility in your UI (we map below)
   const diffEl = document.getElementById("filter-difficulty");
   const muscleEl = document.getElementById("filter-muscle");
+  const categoryEl = document.getElementById("filter-category");
 
-  if (!host || !status || !form || !queryEl || !typeEl || !diffEl || !muscleEl) {
+
+    if (!host || !status || !form || !queryEl || !typeEl || !categoryEl || !diffEl || !muscleEl) {
     console.error("Missing required DOM elements on Skill Search page.");
     return;
-  }
+    }
+
 
   host.innerHTML = `<div class="panel"><p class="small">Loading skills…</p></div>`;
   status.textContent = "Loading…";
@@ -32,11 +36,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const exercises = await loadExerciseDb();
     const exerciseSkills = exercises.map(normalizeExerciseToSkill).filter(Boolean);
 
-    // Future: yogaSkills gets merged here too
-    // const yogaSkills = await loadYogaSkills();
-    // ALL_SKILLS = [...exerciseSkills, ...yogaSkills];
+    let yogaSkills = [];
+    try {
+        yogaSkills = await loadYogaSkills();
+    } catch (e) {
+        console.warn("Yoga load failed (continuing without yoga):", e);
+    }
 
-    ALL_SKILLS = [...exerciseSkills];
+ALL_SKILLS = [...exerciseSkills, ...yogaSkills];
+sessionStorage.setItem(SKILLS_CACHE_KEY, JSON.stringify(ALL_SKILLS));
+
+
+
 
     // Cache for Skill Card page
     sessionStorage.setItem(SKILLS_CACHE_KEY, JSON.stringify(ALL_SKILLS));
@@ -71,14 +82,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     runSearch();
   });
 
-  queryEl.addEventListener("input", debounce(runSearch, 150));
-  typeEl.addEventListener("change", runSearch);
-  diffEl.addEventListener("change", runSearch);
-  muscleEl.addEventListener("change", runSearch);
+    queryEl.addEventListener("input", debounce(runSearch, 150));
+    typeEl.addEventListener("change", runSearch);
+    diffEl.addEventListener("change", runSearch);
+    muscleEl.addEventListener("change", runSearch);
+    categoryEl.addEventListener("change", runSearch);
+
 
   function runSearch() {
     const q = queryEl.value.trim().toLowerCase();
-    const uiType = typeEl.value.trim().toLowerCase();      // strength/balance/flexibility (your UI)
+    const type = typeEl.value.trim().toLowerCase();            // exercise/yoga
+    const category = categoryEl.value.trim().toLowerCase();    // strength/cardio/stretching
     const difficulty = normalizeDifficulty(diffEl.value);  // Beginner/Intermediate/Advanced/Unknown
     const muscle = muscleEl.value.trim().toLowerCase();
 
@@ -86,7 +100,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const filtered = ALL_SKILLS
       .filter((s) => matchesQuerySkill(s, q))
-      .filter((s) => matchesUiType(s, uiType))
+      .filter((s) => matchesType(s, type))
+      .filter((s) => matchesCategory(s, category))
       .filter((s) => matchesDifficultySkill(s, difficulty))
       .filter((s) => matchesMuscleSkill(s, muscle));
 
@@ -189,24 +204,16 @@ function matchesQuerySkill(skill, q) {
   return hay.includes(q);
 }
 
-// Your UI "Type" dropdown is strength/balance/flexibility, but your universal object uses category Strength/Cardio/Stretching.
-// We map UI values to what we can match.
-function matchesUiType(skill, uiType) {
-  if (!uiType) return true;
-
-  const broad = safeStr(skill.category); // strength/cardio/stretching
-
-  if (uiType === "strength") return broad === "strength";
-  if (uiType === "flexibility") return broad === "stretching";
-
-  // Balance isn't a broad category we store; approximate by name keywords for now
-  if (uiType === "balance") {
-    const n = safeStr(skill.name);
-    return n.includes("balance") || n.includes("stand") || n.includes("pose") || n.includes("handstand");
-  }
-
-  return true;
+function matchesType(skill, type) {
+  if (!type) return true;
+  return safeStr(skill.type) === type; // "exercise" or "yoga"
 }
+
+function matchesCategory(skill, category) {
+  if (!category) return true;
+  return safeStr(skill.category) === category; // "strength"|"cardio"|"stretching"
+}
+
 
 function normalizeDifficulty(v) {
   const s = (v ?? "").toString().trim().toLowerCase();

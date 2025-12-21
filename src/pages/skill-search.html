@@ -31,11 +31,21 @@
             <label for="filter-type">Type</label>
             <select id="filter-type" class="input">
               <option value="">Any</option>
-              <option value="strength">Strength</option>
-              <option value="balance">Balance</option>
-              <option value="flexibility">Flexibility</option>
+              <option value="exercise">Exercise</option>
+              <option value="yoga">Yoga</option>
             </select>
           </div>
+
+          <div>
+            <label for="filter-category">Category</label>
+            <select id="filter-category" class="input">
+              <option value="">Any</option>
+              <option value="Strength">Strength</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Stretching">Stretching</option>
+            </select>
+          </div>
+
 
           <div>
             <label for="filter-difficulty">Difficulty</label>
@@ -97,7 +107,7 @@
   </main>
 
   <!-- Scripts (absolute paths) -->
-  <script src="/src/js/app.js"></script>
-  <script src="/src/js/pages/skill-search.js"></script>
+    <script src="/src/js/app.js"></script>
+    <script type="module" src="/src/js/pages/skill-search.js"></script>
 </body>
 </html>
