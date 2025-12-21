@@ -1,52 +1,97 @@
 // src/js/yoga.js
 
 const YOGA_BASE = "https://yoga-api-nzy4.onrender.com/v1";
+const LEVELS = ["beginner", "intermediate", "expert"];
 
+/**
+ * Load yoga poses and normalize them into your universal skill object:
+ * { id, name, type:"yoga", category:"Stretching", difficulty, muscles, equipment }
+ *
+ * Adaptation:
+ * - Fetch by level so we can reliably assign difficulty even if poses omit difficulty_level.
+ */
 export async function loadYogaSkills() {
-  // Pull all poses
-  const res = await fetch(`${YOGA_BASE}/poses`);
-  if (!res.ok) throw new Error(`Yoga API failed: ${res.status}`);
+  // Fetch all levels in parallel
+  const results = await Promise.allSettled(
+    LEVELS.map((lvl) => fetchLevel(lvl))
+  );
 
-  const poses = await res.json();
-  if (!Array.isArray(poses)) return [];
+  // Collect poses from successful calls
+  const all = [];
+  for (const r of results) {
+    if (r.status === "fulfilled") all.push(...r.value);
+    else console.warn("[yoga.js] Level fetch failed:", r.reason);
+  }
 
-  return poses.map(normalizeYogaPoseToSkill).filter(Boolean);
+  // Deduplicate by pose id (a pose should only appear in one level, but be safe)
+  const byId = new Map();
+  for (const s of all) byId.set(s.id, s);
+
+  return Array.from(byId.values());
 }
 
-function normalizeYogaPoseToSkill(p) {
-  const name = String(p?.english_name ?? "").trim();
+async function fetchLevel(level) {
+  const url = `${YOGA_BASE}/poses?level=${encodeURIComponent(level)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Yoga API failed (${level}): ${res.status}`);
+
+  const data = await res.json();
+
+  // Common shapes:
+  // 1) { id, difficulty_level, poses: [...] }
+  // 2) { poses: [...] }
+  // 3) [ ... ]
+  const wrapperDifficulty =
+    data?.difficulty_level ?? data?.difficultyLevel ?? level;
+
+  const poses = Array.isArray(data)
+    ? data
+    : (Array.isArray(data?.poses) ? data.poses : []);
+
+  if (!Array.isArray(poses)) return [];
+
+  return poses
+    .map((p) => normalizeYogaPoseToSkill(p, wrapperDifficulty))
+    .filter(Boolean);
+}
+
+function normalizeYogaPoseToSkill(p, fallbackLevel) {
+  const name = String(p?.english_name ?? p?.name ?? "").trim();
   if (!name) return null;
 
-  const difficulty = normalizeYogaDifficulty(p?.difficulty_level);
+  // Prefer pose difficulty_level if present; otherwise use wrapper/fallback level
+  const difficulty = normalizeYogaDifficulty(
+    p?.difficulty_level ?? p?.difficultyLevel ?? p?.level ?? fallbackLevel
+  );
+
   const muscles = inferMusclesFromYogaCategory(p?.category_name);
 
   return {
-    id: `yoga:${p.id}`,                 // unique
+    id: `yoga:${p?.id ?? slug(name)}`,
     name,
     type: "yoga",
-    category: "Stretching",             // your broad buckets: Strength/Cardio/Stretching
-    difficulty,                         // Beginner/Intermediate/Advanced/Unknown
+    category: "Stretching",
+    difficulty, // Beginner/Intermediate/Advanced/Unknown
     muscles,
-    equipment: "None",                  // yoga poses generally none
-    // optional extras if you want later:
-    // image: p?.url_png || "",
-    // benefits: p?.pose_benefits || "",
-    // yogaCategory: p?.category_name || "",
+    equipment: "None",
+    // Optional: keep extra data for skill card later:
+    // meta: { imageUrl: p?.url_png || "", benefits: p?.pose_benefits || "", yogaCategory: p?.category_name || "" }
   };
 }
 
 function normalizeYogaDifficulty(v) {
   const s = String(v ?? "").toLowerCase().trim();
-  // API uses Beginner/Intermediate + "Expert" in docs :contentReference[oaicite:4]{index=4}
+
+  if (!s) return "Unknown";
   if (s.includes("begin")) return "Beginner";
   if (s.includes("inter")) return "Intermediate";
   if (s.includes("expert")) return "Advanced";
+  if (s.includes("adv")) return "Advanced";
+
   return "Unknown";
 }
 
-// Yoga API doesn’t provide muscles directly in the README examples :contentReference[oaicite:5]{index=5}
-// So we infer a few common ones from category_name.
-// You can expand this any time.
+// Still inference-only (API doesn’t reliably provide muscle lists)
 function inferMusclesFromYogaCategory(categoryName) {
   const c = String(categoryName ?? "").toLowerCase();
 
@@ -62,4 +107,12 @@ function inferMusclesFromYogaCategory(categoryName) {
   if (c.includes("balance")) ["core", "feet"].forEach(m => muscles.add(m));
 
   return Array.from(muscles);
+}
+
+function slug(s) {
+  return String(s)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
