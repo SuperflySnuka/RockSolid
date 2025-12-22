@@ -1,0 +1,11 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/src/pages/index.html" },
+
+    { "source": "/skill-search", "destination": "/src/pages/skill-search.html" },
+    { "source": "/skill", "destination": "/src/pages/skill.html" },
+    { "source": "/my-skills", "destination": "/src/pages/my-skills.html" },
+    { "source": "/routines", "destination": "/src/pages/routines.html" },
+    { "source": "/routine", "destination": "/src/pages/routine.html" }
+  ]
+}
