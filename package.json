@@ -1,0 +1,28 @@
+{
+  "name": "rocksolid",
+  "version": "1.0.0",
+  "description": "RockSolid is a web-based fitness and movement planning application designed to help users discover exercises and yoga poses, save their favorite skills, and organize them into customizable workout routines.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SuperflySnuka/RockSolid.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SuperflySnuka/RockSolid/issues"
+  },
+  "homepage": "https://github.com/SuperflySnuka/RockSolid#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
+    "fuse.js": "^7.1.0"
+  }
+}

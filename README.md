@@ -16,7 +16,7 @@ RockSolid is designed for modern desktop and mobile browsers, including:
 - Safari (macOS & iOS)
 
 The application is optimized for desktop use but remains functional on mobile browsers.
-
+note: some browsers have css breaks.
 ---
 
 ## Live Deployment
