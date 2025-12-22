@@ -1,0 +1,69 @@
+/* src/css/routines.css */
+
+input[type="file"] { display: none; }
+.file-btn { cursor: pointer; }
+
+.btn.danger {
+  border: 1px solid rgba(255, 80, 80, 0.55);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.routine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.routine-item {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer;
+}
+
+.routine-item.active {
+  border-color: rgba(255,255,255,0.35);
+}
+
+.routine-item .name {
+  font-weight: 600;
+}
+
+.routine-item .meta {
+  opacity: 0.8;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.skill-meta { margin: 6px 0; }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  opacity: 0.95;
+}

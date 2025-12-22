@@ -4,19 +4,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>RockSolid | Routines</title>
+
   <link rel="stylesheet" href="../css/base.css" />
   <link rel="stylesheet" href="../css/routines.css" />
 </head>
 <body>
+  <!-- Main nav -->
   <div id="nav"></div>
-<div id="nav"></div>
-<div id="sitemap">
-  <div class="sitemap-container">
-    <a href="index.html">Home</a>
-    <span class="sitemap-separator">/</span>
-    <span class="sitemap-current">Routines</span>
+
+  <!-- Sitemap (kept exactly) -->
+  <div id="sitemap">
+    <div class="sitemap-container">
+      <a href="index.html">Home</a>
+      <span class="sitemap-separator">/</span>
+      <span class="sitemap-current">Routines</span>
+    </div>
   </div>
-</div>
+
   <main class="container">
     <section class="page-title">
       <h1>Routines</h1>
@@ -24,31 +28,40 @@
     </section>
 
     <section class="grid two">
+      <!-- Create routine -->
       <div class="panel">
         <h2>New Routine</h2>
         <div class="spacer"></div>
 
         <label for="routine-name">Routine name</label>
-        <input class="input" id="routine-name" placeholder="Push day, Handstand prep..." />
+        <input
+          class="input"
+          id="routine-name"
+          placeholder="Push day, Handstand prep..."
+        />
 
         <div class="spacer"></div>
         <button class="btn primary" id="create-routine-btn">Create</button>
 
         <div class="hr"></div>
-        <p class="small">Add exercises from Skill Search (later) and manage sets/reps here.</p>
+        <p class="small">
+          Add exercises from Skill Search and manage routines here.
+        </p>
       </div>
 
+      <!-- Saved routines list -->
       <div class="panel">
         <h2>Saved Routines</h2>
         <div class="spacer"></div>
+
         <div id="saved-routines">
-          <!-- list injected here -->
+          <!-- routines injected here -->
         </div>
       </div>
     </section>
   </main>
 
   <script src="../js/app.js"></script>
-  <script src="../js/pages/routines.js"></script>
+  <script type="module" src="../js/pages/routines.js"></script>
 </body>
 </html>

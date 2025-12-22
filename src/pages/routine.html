@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RockSolid | Routine</title>
+
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/routine.css" />
+</head>
+<body>
+  <div id="nav"></div>
+
+  <!-- Sitemap (consistent) -->
+  <div id="sitemap">
+    <div class="sitemap-container">
+      <a href="index.html">Home</a>
+      <span class="sitemap-separator">/</span>
+      <a href="routines.html">Routines</a>
+      <span class="sitemap-separator">/</span>
+      <span class="sitemap-current">Routine</span>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="page-title">
+      <h1 id="routine-title">Routine</h1>
+      <p class="small" id="routine-subtitle">Loading…</p>
+    </section>
+
+    <section class="panel">
+      <div class="row wrap">
+        <button class="btn" id="rename-btn">Rename</button>
+        <button class="btn danger" id="delete-btn">Delete</button>
+        <button class="btn primary" id="export-btn">Export Routine</button>
+        <a class="btn" href="skill-search.html">Find skills</a>
+
+        <span class="small" id="status">Ready</span>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row wrap">
+        <div style="flex:1; min-width:220px;">
+          <label for="add-id">Add skill by ID</label>
+          <input class="input" id="add-id" placeholder="ex:123 or yoga:55" />
+        </div>
+        <div style="align-self:end;">
+          <button class="btn primary" id="add-btn">Add</button>
+        </div>
+      </div>
+
+      <p class="small" style="margin:8px 0 0 0; opacity:.85;">
+        Tip: we’ll add “Add to routine” buttons from Skill Search / Skill Card next. For now paste IDs.
+      </p>
+
+      <div class="hr"></div>
+
+      <div class="grid three" id="items-grid"></div>
+    </section>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/pages/routine.js"></script>
+</body>
+</html>

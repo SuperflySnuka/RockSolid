@@ -23,14 +23,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     renderSkill(skill);
 
-    // Save / routines buttons
+    // Save to My Skills
     el("save-skill-btn")?.addEventListener("click", () => {
       saveToMySkills(skill);
       setStatus("Saved to My Skills ✅");
     });
 
+    // Add to Routine (IDs-only)
     el("add-to-routine-btn")?.addEventListener("click", () => {
-      addSkillToRoutineFlow(skill);
+      addSkillToRoutine(skill.id); // <-- store the id string, not the full object
     });
 
     setStatus("Ready");
@@ -104,7 +105,6 @@ function normalizeExerciseToSkill(ex) {
     .filter(Boolean);
 
   const equipment = String(ex?.equipment ?? "").trim() || "Unknown";
-
   const category = inferBroadCategoryForExercise(ex);
 
   return {
@@ -112,11 +112,11 @@ function normalizeExerciseToSkill(ex) {
     name,
     type: "exercise",
     category, // Strength/Cardio/Stretching
-    difficulty: normalizeExerciseLevel(ex?.level),
+    difficulty: normalizeExerciseLevel(ex?.level), // NOTE: exercise uses "level"
     muscles,
     equipment,
 
-    // ✅ Exercise-only (for instructions box)
+    // Exercise-only
     instructions: normalizeInstructions(ex?.instructions),
   };
 }
@@ -133,7 +133,6 @@ function normalizeYogaToSkill(p) {
     difficulty: normalizeYogaDifficulty(p?.difficulty_level ?? p?.level),
     muscles: inferMusclesFromYogaCategory(p?.category_name),
     equipment: "None",
-    // No instructions for yoga in this schema (leave undefined)
   };
 }
 
@@ -206,8 +205,6 @@ function renderInstructionsBox(skill) {
 /* ----------------- My Skills ----------------- */
 
 function saveToMySkills(skill) {
-  const MY_SKILLS_KEY = "rocksolid_my_skills_v1";
-
   const ids = safeParse(localStorage.getItem(MY_SKILLS_KEY), []);
   const next = Array.isArray(ids) ? ids : [];
 
@@ -216,39 +213,46 @@ function saveToMySkills(skill) {
   localStorage.setItem(MY_SKILLS_KEY, JSON.stringify(next));
 }
 
+/* ----------------- Routines (IDs-only) ----------------- */
 
-/* ----------------- Routines ----------------- */
+function addSkillToRoutine(skillId) {
+  if (typeof skillId !== "string" || (!skillId.startsWith("ex:") && !skillId.startsWith("yoga:"))) {
+    setStatus("Invalid skill id (expected ex:123 or yoga:55).");
+    return;
+  }
 
-function addSkillToRoutineFlow(skill) {
   const routines = safeParse(localStorage.getItem(ROUTINES_KEY), []);
+  const list = Array.isArray(routines) ? routines : [];
 
-  if (!routines.length) {
+  // If no routines exist, auto-create one
+  if (!list.length) {
     const newRoutine = {
       id: `routine:${Date.now()}`,
       name: "My Routine",
       createdAt: new Date().toISOString(),
-      items: [skill],
+      items: [skillId], // ✅ IDs only
     };
     localStorage.setItem(ROUTINES_KEY, JSON.stringify([newRoutine]));
     setStatus(`Created "My Routine" and added skill ✅`);
     return;
   }
 
-  const names = routines.map((r, i) => `${i + 1}: ${r.name}`).join("\n");
+  const names = list.map((r, i) => `${i + 1}: ${r?.name ?? "Unnamed Routine"}`).join("\n");
   const pick = prompt(`Add to which routine?\n${names}\n\nEnter a number:`);
 
   const idx = Number.parseInt(pick, 10) - 1;
-  if (Number.isNaN(idx) || idx < 0 || idx >= routines.length) {
+  if (Number.isNaN(idx) || idx < 0 || idx >= list.length) {
     setStatus("Cancelled (no routine selected).");
     return;
   }
 
-  const r = routines[idx];
+  const r = list[idx];
   r.items = Array.isArray(r.items) ? r.items : [];
-  if (!r.items.some((s) => s?.id === skill.id)) r.items.push(skill);
 
-  routines[idx] = r;
-  localStorage.setItem(ROUTINES_KEY, JSON.stringify(routines));
+  if (!r.items.includes(skillId)) r.items.push(skillId); // ✅ IDs only
+
+  list[idx] = r;
+  localStorage.setItem(ROUTINES_KEY, JSON.stringify(list));
   setStatus(`Added to "${r.name}" ✅`);
 }
 
