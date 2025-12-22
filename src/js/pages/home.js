@@ -1,14 +1,13 @@
 /*idk yet */
-
 // src/js/pages/home.js
 
-// 1) Put your default GIF URL here (this will show if Tenor fails)
+// tenor faluire gif
 const DEFAULT_GIF_URL = "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGV1bTg3eWtjZndvZ2R2bGRqazZ4MTNzaW4zc2hzcmVlOThjZXgxdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/t9lBEE2FGMzbY9s5IX/giphy.gif";
 
-// 2) Optional: change query
+// 2) tenor query:
 const TENOR_QUERY = "man flexing muscles";
 
-// 3) Backend endpoint you *intend* to have later
+// 3) Backend endpoint:
 const TENOR_ENDPOINT = "/api/tenor";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -23,16 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadFlexGif() {
   const host = document.getElementById("flex-gif");
   const status = document.getElementById("gif-status");
-
-  // If the page doesn't have a gif container, do nothing safely
   if (!host) return;
 
-  // Always show something immediately (default)
+  // Always show something immediately
   if (DEFAULT_GIF_URL && !DEFAULT_GIF_URL.includes("PASTE_YOUR")) {
     renderGif(host, DEFAULT_GIF_URL, "Default flex gif");
     if (status) status.textContent = "Loaded default gif 💪";
   } else {
-    // If you haven't set a default yet, show placeholder
     host.innerHTML = `
       <div class="panel">
         <p class="small" style="margin:0;">
@@ -43,7 +39,7 @@ async function loadFlexGif() {
     if (status) status.textContent = "Default GIF missing";
   }
 
-  // Try Tenor backend after (non-blocking UX)
+  // Try Tenor backend after
   try {
     if (status) status.textContent = "Trying Tenor…";
 

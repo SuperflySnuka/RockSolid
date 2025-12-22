@@ -1,5 +1,5 @@
 // ../js/pages/routine.js
-// Routine detail page: add/remove items by ID, rehydrate, export (Option A).
+// Routine detail page: add/remove items by ID, rehydrate, export, delete, rename, and display items
 
 const ROUTINES_KEY = "rocksolid_routines_v1";
 const SIGNATURE_ROUTINE_ONE = "RockSolidRoutine/v1";

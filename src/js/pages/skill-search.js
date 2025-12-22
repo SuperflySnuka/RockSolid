@@ -1,62 +1,65 @@
 // src/js/pages/skill-search.js
+// Requires Fuse.js to be loaded globally via CDN (window.Fuse)
+
 import { loadYogaSkills } from "../yoga.js";
 
 const EXERCISE_URL = "/src/data/exercises.json";
 const SKILLS_CACHE_KEY = "rocksolid_skills_cache_v1";
 
 let ALL_SKILLS = [];
+let fuse = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("SKILL SEARCH JS CONNECTED ✅");
 
+  // DOM
   const host = document.getElementById("results-grid");
   const status = document.getElementById("search-status");
   const count = document.getElementById("results-count");
 
-  const form = document.getElementById("search-form");
-  const clearBtn = document.getElementById("clear-btn");
-
   const queryEl = document.getElementById("query");
-  const typeEl = document.getElementById("filter-type"); // Strength/Balance/Flexibility in your UI (we map below)
-  const diffEl = document.getElementById("filter-difficulty");
-  const muscleEl = document.getElementById("filter-muscle");
-  const categoryEl = document.getElementById("filter-category");
+  const typeEl = document.getElementById("filter-type");         // strength | balance | flexibility
+  const diffEl = document.getElementById("filter-difficulty");    // beginner | intermediate | advanced
+  const muscleEl = document.getElementById("filter-muscle");     // legs | core | etc.
+  const searchBtn = document.getElementById("search-btn");
 
-
-    if (!host || !status || !form || !queryEl || !typeEl || !categoryEl || !diffEl || !muscleEl) {
-    console.error("Missing required DOM elements on Skill Search page.");
+  if (!host || !status || !queryEl || !typeEl || !diffEl || !muscleEl) {
+    console.error("Skill Search: Missing required DOM elements.");
     return;
-    }
-
+  }
 
   host.innerHTML = `<div class="panel"><p class="small">Loading skills…</p></div>`;
   status.textContent = "Loading…";
 
+  // Load data
   try {
-    const exercises = await loadExerciseDb();
-    const exerciseSkills = exercises.map(normalizeExerciseToSkill).filter(Boolean);
+    const exercisesRaw = await loadExerciseDb();
+    const exerciseSkills = exercisesRaw.map(normalizeExerciseToSkill).filter(Boolean);
 
     let yogaSkills = [];
     try {
-        yogaSkills = await loadYogaSkills();
+      const yogaRaw = await loadYogaSkills();
+      yogaSkills = Array.isArray(yogaRaw) ? yogaRaw.map(normalizeYogaToSkill).filter(Boolean) : [];
     } catch (e) {
-        console.warn("Yoga load failed (continuing without yoga):", e);
+      console.warn("Yoga load failed (continuing without yoga):", e);
     }
 
     ALL_SKILLS = [...exerciseSkills, ...yogaSkills];
-    // Cache for Skill Card page
+
     sessionStorage.setItem(SKILLS_CACHE_KEY, JSON.stringify(ALL_SKILLS));
 
+    // Build Fuse index
+    buildFuseIndex();
+
     status.textContent = `Loaded ${ALL_SKILLS.length} skills`;
-    runSearch();
+    runSearch(); // initial render
   } catch (e) {
     console.error(e);
     status.textContent = "Failed to load skills";
     host.innerHTML = `
       <div class="panel">
         <p class="small">
-          Could not load <code>${EXERCISE_URL}</code>.
-          Check Live Server + Network tab (should be 200).
+          Failed to load skill data. Check the Network tab for 200 responses.
         </p>
       </div>
     `;
@@ -64,55 +67,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Events
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    runSearch();
-  });
-
-  clearBtn?.addEventListener("click", () => {
-    queryEl.value = "";
-    typeEl.value = "";
-    diffEl.value = "";
-    muscleEl.value = "";
-    categoryEl.value = "";
-    runSearch();
-  });
-
-    queryEl.addEventListener("input", debounce(runSearch, 150));
-    typeEl.addEventListener("change", runSearch);
-    diffEl.addEventListener("change", runSearch);
-    muscleEl.addEventListener("change", runSearch);
-    categoryEl.addEventListener("change", runSearch);
-
+  queryEl.addEventListener("input", debounce(runSearch, 150));
+  typeEl.addEventListener("change", runSearch);
+  diffEl.addEventListener("change", runSearch);
+  muscleEl.addEventListener("change", runSearch);
+  searchBtn?.addEventListener("click", runSearch);
 
   function runSearch() {
-    const q = queryEl.value.trim().toLowerCase();
-    const type = typeEl.value.trim().toLowerCase();            // exercise/yoga
-    const category = categoryEl.value.trim().toLowerCase();    // strength/cardio/stretching
-    const difficulty = normalizeDifficulty(diffEl.value);  // Beginner/Intermediate/Advanced/Unknown
-    const muscle = muscleEl.value.trim().toLowerCase();
+    const q = queryEl.value.trim();
+    const uiType = typeEl.value.trim().toLowerCase();           // strength|balance|flexibility
+    const difficulty = normalizeDifficulty(diffEl.value);        // beginner|intermediate|advanced|""
+    const muscle = muscleEl.value.trim().toLowerCase();          // can be "" or "legs" etc.
 
-    status.textContent = "Filtering…";
+    status.textContent = "Searching…";
 
-    const filtered = ALL_SKILLS
-      .filter((s) => matchesQuerySkill(s, q))
-      .filter((s) => matchesType(s, type))
-      .filter((s) => matchesCategory(s, category))
-      .filter((s) => matchesDifficultySkill(s, difficulty))
-      .filter((s) => matchesMuscleSkill(s, muscle));
+    // 1) Use Fuse for query text (if any), otherwise start with ALL_SKILLS
+    let list = ALL_SKILLS;
 
-    filtered.sort((a, b) => safeStr(a.name).localeCompare(safeStr(b.name)));
+    if (q) {
+      if (!fuse) buildFuseIndex();
+      const results = fuse.search(q);
+      list = results.map(r => r.item);
+    }
 
-    renderTable(host, filtered.slice(0, 200));
+    // 2) Apply dropdown filters AFTER fuzzy search
+    list = list
+      .filter(s => matchesUiType(s, uiType))
+      .filter(s => matchesDifficultySkill(s, difficulty))
+      .filter(s => matchesMuscleSkill(s, muscle));
+
+    // 3) Sort
+    list.sort((a, b) => safeStr(a.name).localeCompare(safeStr(b.name)));
+
+    // 4) Render
+    renderTable(host, list.slice(0, 200));
 
     status.textContent = "Ready";
     if (count) {
-      count.textContent = `${filtered.length} result(s)${filtered.length > 200 ? " (showing first 200)" : ""}`;
+      count.textContent = `${list.length} result(s)${list.length > 200 ? " (showing first 200)" : ""}`;
     }
   }
 });
 
-/* ----------------- load + normalize ----------------- */
+/* ----------------- load ----------------- */
 
 async function loadExerciseDb() {
   const res = await fetch(EXERCISE_URL);
@@ -122,103 +119,171 @@ async function loadExerciseDb() {
   return data;
 }
 
+/* ----------------- normalization (universal skill) ----------------- */
 /**
  * Universal skill object:
- * (id, name, type, category, difficulty, muscles, equipment)
+ * id: "ex:123" | "yoga:55"
+ * name
+ * type: "exercise" | "yoga"
+ * category: "Strength" | "Cardio" | "Stretching"
+ * difficulty: "beginner"|"intermediate"|"advanced"|"" (unknown -> "")
+ * muscles: string[]
+ * equipment: string
+ * (optional) instructions: string[]
  */
+
 function normalizeExerciseToSkill(ex) {
-  const name = (ex?.name ?? "").trim();
-  if (!name) return null;
+  const name = String(ex?.name ?? "").trim();
+  const rawId = ex?.id;
+  if (!name || rawId === undefined || rawId === null) return null;
 
   const muscles = [
     ...(Array.isArray(ex.primaryMuscles) ? ex.primaryMuscles : []),
     ...(Array.isArray(ex.secondaryMuscles) ? ex.secondaryMuscles : []),
+    ex.target,
+    ex.bodyPart,
   ]
-    .map((m) => String(m).toLowerCase().trim())
+    .map(v => String(v).toLowerCase().trim())
     .filter(Boolean);
 
-  const equipment = (ex?.equipment ?? "").toString().trim() || "Unknown";
+  const equipment = String(ex?.equipment ?? "Unknown").trim();
 
-  // Your broad buckets: Strength/Cardio/Stretching
-  // Exercise DB doesn’t always give enough to perfectly classify.
-  // We default to Strength with a tiny heuristic for cardio.
+  // exercises DB uses `level` for difficulty
+  const difficulty = normalizeDifficulty(ex?.level ?? ex?.difficulty ?? "");
+
   const category = inferBroadCategoryForExercise(ex);
 
+  // Some DBs include instructions; keep if present
+  const instructions = Array.isArray(ex?.instructions)
+    ? ex.instructions.map(s => String(s).trim()).filter(Boolean)
+    : [];
+
   return {
-    id: `ex:${ex.id ?? slug(name)}`,
+    id: `ex:${rawId}`,
     name,
     type: "exercise",
-    category,                 // Strength/Cardio/Stretching
-    difficulty: normalizeExerciseLevel(ex.level),
+    category,          // "Strength"|"Cardio"|"Stretching"
+    difficulty,        // normalized lowercase or ""
     muscles,
     equipment,
+    instructions,
   };
 }
 
-function normalizeExerciseLevel(level) {
-  if (!level) return "Unknown";
+function normalizeYogaToSkill(y) {
+  // handle both already-normalized and raw yoga-api objects
+  if (y && typeof y === "object" && typeof y.id === "string" && (y.id.startsWith("yoga:") || y.type === "yoga")) {
+    return {
+      id: String(y.id || "").startsWith("yoga:") ? String(y.id) : `yoga:${String(y.id || "").replace("yoga:", "")}`,
+      name: String(y.name ?? "").trim(),
+      type: "yoga",
+      category: normalizeYogaCategory(y.category),
+      difficulty: normalizeDifficulty(y.difficulty ?? y.level ?? ""),
+      muscles: Array.isArray(y.muscles) ? y.muscles.map(m => String(m).toLowerCase().trim()).filter(Boolean) : [],
+      equipment: String(y.equipment ?? "None").trim(),
+    };
+  }
 
-  const v = String(level).toLowerCase();
+  const name = String(y?.english_name ?? y?.name ?? "").trim();
+  const rawId = y?.id;
+  if (!name || rawId === undefined || rawId === null) return null;
 
-  if (v.includes("begin")) return "Beginner";
-  if (v.includes("inter")) return "Intermediate";
-  if (v.includes("adv")) return "Advanced";
+  return {
+    id: `yoga:${rawId}`,
+    name,
+    type: "yoga",
+    category: "Stretching",
+    difficulty: normalizeDifficulty(y?.difficulty ?? y?.level ?? ""),
+    muscles: [],
+    equipment: "None",
+  };
+}
 
-  return "Unknown";
+function normalizeYogaCategory(v) {
+  const s = String(v ?? "").trim().toLowerCase();
+  if (!s) return "Stretching";
+  if (s.includes("strength")) return "Strength";
+  if (s.includes("cardio")) return "Cardio";
+  return "Stretching";
 }
 
 function inferBroadCategoryForExercise(ex) {
   const name = safeStr(ex?.name);
   const cat = safeStr(ex?.category);
 
-  // Heuristic cardio keywords (adjust later if needed)
   const cardioHints = ["run", "sprint", "jump rope", "burpee", "row", "bike", "cycling", "cardio"];
-  if (cardioHints.some((k) => name.includes(k) || cat.includes(k))) return "Cardio";
+  if (cardioHints.some(k => name.includes(k) || cat.includes(k))) return "Cardio";
 
-  // If category suggests stretching
   const stretchHints = ["stretch", "mobility", "flexibility"];
-  if (stretchHints.some((k) => name.includes(k) || cat.includes(k))) return "Stretching";
+  if (stretchHints.some(k => name.includes(k) || cat.includes(k))) return "Stretching";
 
   return "Strength";
 }
 
-/* ----------------- filtering on universal skill ----------------- */
+/* ----------------- Fuse ----------------- */
 
-function matchesQuerySkill(skill, q) {
-  if (!q) return true;
-  const hay = [
-    skill.name,
-    skill.type,
-    skill.category,
-    skill.difficulty,
-    skill.equipment,
-    ...(Array.isArray(skill.muscles) ? skill.muscles : []),
-  ]
-    .map((v) => safeStr(v))
-    .join(" | ");
+function buildFuseIndex() {
+  if (!window.Fuse) {
+    console.warn("Fuse.js not found. Did you include the CDN script tag?");
+    fuse = null;
+    return;
+  }
 
-  return hay.includes(q);
+  fuse = new window.Fuse(ALL_SKILLS, {
+    includeScore: true,
+    threshold: 0.35, // lower = stricter, higher = fuzzier
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+    keys: [
+      { name: "name", weight: 0.5 },
+      { name: "muscles", weight: 0.2 },
+      { name: "equipment", weight: 0.1 },
+      { name: "category", weight: 0.1 },
+      { name: "difficulty", weight: 0.05 },
+      { name: "type", weight: 0.05 },
+    ],
+  });
 }
 
-function matchesType(skill, type) {
-  if (!type) return true;
-  return safeStr(skill.type) === type; // "exercise" or "yoga"
-}
+/* ----------------- filtering ----------------- */
 
-function matchesCategory(skill, category) {
-  if (!category) return true;
-  return safeStr(skill.category) === category; // "strength"|"cardio"|"stretching"
+function matchesUiType(skill, uiType) {
+  if (!uiType) return true;
+
+  const cat = safeStr(skill.category); // "strength"|"cardio"|"stretching"
+  const name = safeStr(skill.name);
+
+  if (uiType === "strength") return cat === "strength";
+  if (uiType === "flexibility") return cat === "stretching";
+
+  if (uiType === "balance") {
+    // approximate balance by name keywords
+    return (
+      name.includes("balance") ||
+      name.includes("stand") ||
+      name.includes("handstand") ||
+      name.includes("pose") ||
+      name.includes("one-leg")
+    );
+  }
+
+  return true;
 }
 
 function normalizeDifficulty(v) {
-  const s = (v ?? "").toString().trim().toLowerCase();
-  if (!s) return ""; // Any
+  const s = String(v ?? "").trim().toLowerCase();
+  if (!s) return ""; // Any / Unknown
 
   if (s === "beginner") return "beginner";
   if (s === "intermediate") return "intermediate";
   if (s === "advanced") return "advanced";
 
-  return s;
+  // common variants
+  if (s.includes("begin")) return "beginner";
+  if (s.includes("inter")) return "intermediate";
+  if (s.includes("adv")) return "advanced";
+
+  return ""; // treat weird values as unknown
 }
 
 function matchesDifficultySkill(skill, difficulty) {
@@ -228,8 +293,21 @@ function matchesDifficultySkill(skill, difficulty) {
 
 function matchesMuscleSkill(skill, muscleFilter) {
   if (!muscleFilter) return true;
+
   const muscles = Array.isArray(skill.muscles) ? skill.muscles.map(safeStr) : [];
-  return muscles.some((m) => m.includes(muscleFilter));
+
+  // If your dropdown uses broad groups like "legs", let it match sub-muscles
+  if (muscleFilter === "legs") {
+    const legHints = ["quadriceps", "hamstrings", "calves", "glutes", "adductors", "abductors", "legs", "thigh"];
+    return muscles.some(m => legHints.some(h => m.includes(h)));
+  }
+
+  if (muscleFilter === "core") {
+    const coreHints = ["abdominals", "abs", "core", "obliques", "rectus abdominis", "transverse"];
+    return muscles.some(m => coreHints.some(h => m.includes(h)));
+  }
+
+  return muscles.some(m => m.includes(muscleFilter));
 }
 
 /* ----------------- render table ----------------- */
@@ -248,11 +326,12 @@ function renderTable(host, list) {
       const equipment = escapeHtml(s.equipment ?? "Unknown");
       const category = escapeHtml(s.category ?? "Strength");
       const type = escapeHtml(s.type ?? "exercise");
-      const difficulty = escapeHtml(s.difficulty ?? "Unknown");
+      const difficulty = escapeHtml(s.difficulty || "unknown");
 
+      // IMPORTANT: use relative link so Live Server + Vercel both behave
       return `
         <tr>
-          <td><a href="/src/pages/skill.html?id=${id}"><strong>${name}</strong></a></td>
+          <td><a href="./skill.html?id=${id}"><strong>${name}</strong></a></td>
           <td>${type}</td>
           <td>${category}</td>
           <td>${difficulty}</td>
@@ -278,14 +357,11 @@ function renderTable(host, list) {
         </thead>
         <tbody>${rows}</tbody>
       </table>
-      <p class="small" style="margin-top:10px; opacity:0.85;">
-        Click a skill name to open the Skill Card.
-      </p>
     </div>
   `;
 }
 
-/* ----------------- utilities ----------------- */
+/* ----------------- utils ----------------- */
 
 function safeStr(v) {
   return (typeof v === "string" ? v : String(v ?? "")).toLowerCase();
@@ -307,12 +383,4 @@ function debounce(fn, ms) {
     clearTimeout(t);
     t = setTimeout(() => fn(...args), ms);
   };
-}
-
-function slug(s) {
-  return String(s)
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 }

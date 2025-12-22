@@ -66,7 +66,7 @@ async function fetchExerciseSkill(exId) {
   const data = await res.json();
   if (!Array.isArray(data)) throw new Error("exercises.json must be an array");
 
-  // Exercise DB ids might be number or string; compare loosely
+  // Exercise DB ids might be number or string; normalize to string
   const ex = data.find((x) => String(x?.id) === String(exId));
   if (!ex) return null;
 

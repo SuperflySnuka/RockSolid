@@ -11,19 +11,16 @@ const LEVELS = ["beginner", "intermediate", "expert"];
  * - Fetch by level so we can reliably assign difficulty even if poses omit difficulty_level.
  */
 export async function loadYogaSkills() {
-  // Fetch all levels in parallel
   const results = await Promise.allSettled(
     LEVELS.map((lvl) => fetchLevel(lvl))
   );
 
-  // Collect poses from successful calls
   const all = [];
   for (const r of results) {
     if (r.status === "fulfilled") all.push(...r.value);
     else console.warn("[yoga.js] Level fetch failed:", r.reason);
   }
 
-  // Deduplicate by pose id (a pose should only appear in one level, but be safe)
   const byId = new Map();
   for (const s of all) byId.set(s.id, s);
 
@@ -37,10 +34,6 @@ async function fetchLevel(level) {
 
   const data = await res.json();
 
-  // Common shapes:
-  // 1) { id, difficulty_level, poses: [...] }
-  // 2) { poses: [...] }
-  // 3) [ ... ]
   const wrapperDifficulty =
     data?.difficulty_level ?? data?.difficultyLevel ?? level;
 
@@ -59,7 +52,6 @@ function normalizeYogaPoseToSkill(p, fallbackLevel) {
   const name = String(p?.english_name ?? p?.name ?? "").trim();
   if (!name) return null;
 
-  // Prefer pose difficulty_level if present; otherwise use wrapper/fallback level
   const difficulty = normalizeYogaDifficulty(
     p?.difficulty_level ?? p?.difficultyLevel ?? p?.level ?? fallbackLevel
   );
@@ -74,8 +66,6 @@ function normalizeYogaPoseToSkill(p, fallbackLevel) {
     difficulty, // Beginner/Intermediate/Advanced/Unknown
     muscles,
     equipment: "None",
-    // Optional: keep extra data for skill card later:
-    // meta: { imageUrl: p?.url_png || "", benefits: p?.pose_benefits || "", yogaCategory: p?.category_name || "" }
   };
 }
 

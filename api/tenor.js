@@ -34,7 +34,6 @@ export default async function handler(request) {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        // Cache a bit to reduce API hits
         "Cache-Control": "s-maxage=300, stale-while-revalidate=600",
       },
     });

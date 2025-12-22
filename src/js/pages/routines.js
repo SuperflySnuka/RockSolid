@@ -1,15 +1,10 @@
 // ../js/pages/routines.js
-// Minimal routines MVP: create + list + delete (IDs-only items for later)
-// + OPTIONAL Supabase Cloud Sync buttons (Load from Cloud / Save to Cloud)
 
 const ROUTINES_KEY = "rocksolid_routines_v1";
 
 /* -------------------- Supabase API helpers (Vercel) -------------------- */
 /**
- * Requires you to have a Vercel Serverless Function at:
  *   /api/routines  (GET returns array, POST saves one)
- *
- * Buttons expected in routines.html (optional):
  *   #load-cloud-btn
  *   #save-cloud-btn
  */
@@ -68,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderRoutines();
   });
 
-  // OPTIONAL: Cloud Sync buttons (won't break if they don't exist)
   document.getElementById("load-cloud-btn")?.addEventListener("click", async () => {
     try {
       const cloud = await loadRoutinesFromCloud();
@@ -101,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Save the newest routine (simple + safe)
+      // Save the newest routine
       const newest = routines
         .slice()
         .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))[0];
@@ -192,19 +186,19 @@ function setRoutines(routines) {
   localStorage.setItem(ROUTINES_KEY, JSON.stringify(routines));
 }
 
-function normalizeRoutine(r) {
-  if (!r || typeof r !== "object") return null;
+function normalizeRoutine(rout) {
+  if (!rout || typeof rout !== "object") return null;
 
-  const id = String(r.id || "").trim();
-  const name = String(r.name || "").trim();
+  const id = String(rout.id || "").trim();
+  const name = String(rout.name || "").trim();
   if (!id.startsWith("routine:") || !name) return null;
 
-  const items = Array.isArray(r.items) ? r.items.filter((x) => typeof x === "string") : [];
+  const items = Array.isArray(rout.items) ? rout.items.filter((x) => typeof x === "string") : [];
 
   return {
     id,
     name,
-    createdAt: r.createdAt || new Date().toISOString(),
+    createdAt: rout.createdAt || new Date().toISOString(),
     items,
   };
 }

@@ -1,5 +1,5 @@
 // src/js/pages/my-skills.js
-// Option A signed export file. IDs-only storage. Rehydrate for display.
+// signed export file. IDs-only storage. Rehydrate for display.
 
 const MY_SKILLS_KEY = "rocksolid_my_skills_v1";
 const SIGNATURE_MY_SKILLS = "RockSolidMySkills/v1";
@@ -129,7 +129,7 @@ function clearAll() {
 }
 
 /* ---------- Rehydrate by id ---------- */
-
+//matches ids to skill objects
 async function fetchSkillById(id) {
   if (id.startsWith("ex:")) return await fetchExerciseSkill(id.slice(3));
   if (id.startsWith("yoga:")) return await fetchYogaSkill(id.slice(5));
@@ -183,21 +183,21 @@ function normalizeExerciseToSkill(ex) {
   };
 }
 
-function normalizeYogaToSkill(p) {
-  const name = String(p?.english_name ?? p?.name ?? "").trim();
+function normalizeYogaToSkill(skillInfo) {
+  const name = String(skillInfo?.english_name ?? skillInfo?.name ?? "").trim();
   if (!name) return null;
 
   return {
-    id: `yoga:${p?.id}`,
+    id: `yoga:${skillInfo?.id}`,
     name,
     type: "yoga",
     category: "Stretching",
-    difficulty: normalizeYogaDifficulty(p?.difficulty_level ?? p?.level),
-    muscles: inferMusclesFromYogaCategory(p?.category_name),
+    difficulty: normalizeYogaDifficulty(skillInfo?.difficulty_level ?? skillInfo?.level),
+    muscles: inferMusclesFromYogaCategory(skillInfo?.category_name),
     equipment: "None",
   };
 }
-
+//this doesnt wark but was fun to try
 function inferBroadCategoryForExercise(ex) {
   const name = safeStr(ex?.name);
   const cat = safeStr(ex?.category);
@@ -220,8 +220,8 @@ function normalizeExerciseLevel(level) {
   return "Unknown";
 }
 
-function normalizeYogaDifficulty(v) {
-  const s = String(v ?? "").toLowerCase().trim();
+function normalizeYogaDifficulty(level) {
+  const s = String(level ?? "").toLowerCase().trim();
   if (!s) return "Unknown";
   if (s.includes("begin")) return "Beginner";
   if (s.includes("inter")) return "Intermediate";
@@ -248,33 +248,33 @@ function inferMusclesFromYogaCategory(categoryName) {
 
 /* ---------- Rendering ---------- */
 
-function renderCard(s) {
-  const idEnc = encodeURIComponent(s.id);
-  const muscles = Array.isArray(s.muscles) ? s.muscles.slice(0, 4) : [];
+function renderCard(skillInfo) {
+  const idEnc = encodeURIComponent(skillInfo.id);
+  const muscles = Array.isArray(skillInfo.muscles) ? skillInfo.muscles.slice(0, 4) : [];
   const chips = (muscles.length ? muscles : ["—"])
     .map(m => `<span class="chip">${escapeHtml(m)}</span>`)
     .join("");
 
   return `
     <div class="panel">
-      <h3 style="margin-top:0;">${escapeHtml(s.name ?? "Unnamed")}</h3>
+      <h3 style="margin-top:0;">${escapeHtml(skillInfo.name ?? "Unnamed")}</h3>
       <p class="small skill-meta">
-        ${escapeHtml(s.type ?? "?")} • ${escapeHtml(s.category ?? "?")} • ${escapeHtml(s.difficulty ?? "Unknown")}
+        ${escapeHtml(skillInfo.type ?? "?")} • ${escapeHtml(skillInfo.category ?? "?")} • ${escapeHtml(skillInfo.difficulty ?? "Unknown")}
       </p>
-      <p class="small skill-meta">Equipment: ${escapeHtml(s.equipment ?? "Unknown")}</p>
+      <p class="small skill-meta">Equipment: ${escapeHtml(skillInfo.equipment ?? "Unknown")}</p>
 
       <div class="chips">${chips}</div>
 
       <div class="row wrap" style="margin-top:12px;">
         <a class="btn primary" href="/src/pages/skill.html?id=${idEnc}">View</a>
-        <button class="btn" data-action="remove" data-id="${escapeHtml(s.id)}">Remove</button>
+        <button class="btn" data-action="remove" data-id="${escapeHtml(skillInfo.id)}">Remove</button>
       </div>
     </div>
   `;
 }
 
 /* ---------- Utilities ---------- */
-
+//basically just ripped from the internet
 function isValidSkillId(id) {
   return typeof id === "string" && (id.startsWith("ex:") || id.startsWith("yoga:"));
 }
