@@ -9,6 +9,7 @@ Whats not finished or not working...
 4. single user model
     -Needs user authentification.
 
+5. APIs supabase and tenor worked when hosted from client but not when pushed to production.
 
 ## Overview
 
@@ -19,13 +20,17 @@ A lightweight backend is used to proxy external services from tenor and integrat
 ---
 
 ## Local Installation
-After downloading the repo. it should run right away after activating a live server.
+After downloading the repo.
+open the rootfolder and run
+
 
 
 ### Prerequisites
 - Node.js (v18 or newer)
 - Git
 - A modern web browser
+- fuse.js
+- supabase
 
 ### Clone the Repository
 ```bash
