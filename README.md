@@ -27,7 +27,6 @@ RockSolid is deployed using **Vercel**:
 ---
 
 ## Developer Documentation
-
 For setup instructions, backend API details, known issues, and future development plans, see the **Developer Manual**:
 
 📄 [`docs/developer-manual.md`](docs/developer-manual.md)

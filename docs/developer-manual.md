@@ -18,10 +18,21 @@ The frontend consumes data via Fetch API from both local JSON files and external
 A lightweight backend is used to proxy external services from tenor and integrate a Supabase database.
 
 ---
+### Backend
+- Vercel Serverless Functions (`/api`)
+- Supabase (PostgreSQL) for optional cloud persistence
+- External APIs:
+  - Tenor GIF API (home page visuals)
+  - Yoga API (pose data)
+  - Free Exercise DB (local JSON)
+
 
 ## Local Installation
+either go down and imidetaly run the bash or...
+
 After downloading the repo.
-open the rootfolder and run
+open the root folder cmd
+nmp install
 
 
 
@@ -36,3 +47,4 @@ open the rootfolder and run
 ```bash
 git clone https://github.com/SuperflySnuka/RockSolid.git
 cd RockSolid
+nmp install
